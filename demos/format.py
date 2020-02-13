@@ -44,6 +44,9 @@ root.lfp.add_band(name='theta')
 root.unit
 
 # %%
+root.epoch = [[500, 600], [700, 800]]
+
+# %%
 # root.align()
 # root.active_unit = (1, 0)
 # #root.active_lfp = 0

@@ -23,9 +23,26 @@ class Session:
 
         self.epoch = [-np.inf, np.inf]
 
+        self.metadata = {}
+
+        self.__mode = 'cat'
+
     @property
     def data(self):
         return dc(self.__data)
+
+    @property
+    def mode(self):
+        return self.__mode
+
+    @mode.setter
+    def mode(self, arg):
+        if arg == 'cat':
+            self.__mode = 'cat'
+        elif arg == 'map':
+            self.__mode = 'map'
+        else:
+            print('Mode must be "cat" or "map"')
 
     def add_custom(self, var, name):
         assert self.__raw['ts'].__len__() == var.__len__(), \

@@ -6,8 +6,10 @@ from copy import deepcopy as dc
 class Unit:
     def __init__(self, ts):
         self.__raw = {'ts': ts}
-        self.__epoched = None
+        self.__data = None
+
         self.epoch = [-np.inf, np.inf]
+        self.metadata = {}
 
     def align(self, beh, lfp=None):
         self.__raw['ind_beh'] = np.digitize(self.__raw['ts'], beh['ts'])

@@ -14,6 +14,8 @@ class Lfp:
         self.__data = None
         self.__epoch = (-np.inf, np.inf)
 
+        self.metadata = {}
+
     def align(self, ts_beh):
         self.__raw['ind_beh'] = np.digitize(self.__raw['ts'], ts_beh)
         self__epoch = self.epoch
