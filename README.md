@@ -47,6 +47,6 @@ The main datastructures are:
 - Function for saving to a NeurodataWithoutBorders (.nwb) format.
 
 ## Installation:
-`git clone https://github.com/wchapman/BeEPy.git`
-`cd BeEPy`
-`pip install -e .`
+- `git clone https://github.com/wchapman/BeEPy.git`
+- `cd BeEPy`
+- `pip install -e .`
