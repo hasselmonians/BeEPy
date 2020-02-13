@@ -48,3 +48,7 @@ def ratemap(root, xe=None, ye=None, occ_thresh=0, smooth=2):
         spks[unvisited] = np.nan
 
     return rm, occ, spks
+
+
+def polar_ratemap(root, be=None):
+    pass

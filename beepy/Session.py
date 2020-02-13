@@ -9,7 +9,7 @@ import beepy.Unit
 class Session:
     def __init__(self, fs, ts, x, y, hd=None, vel=None, lfp=None, units=None):
         self.__fs = fs
-        self.__raw = {'ts': dc(ts), 'x': dc(x), 'y': dc(y), 'i': np.cumsum(np.ones_like(x))-1}
+        self.__raw = {'ts': dc(ts), 'x': dc(x), 'y': dc(y), 'i': np.cumsum(np.ones_like(x)) - 1}
         if hd is not None:
             self.add_custom(hd, 'hd')
         if vel is not None:
@@ -35,13 +35,16 @@ class Session:
     def align(self):
         ts_beh = self.__raw['ts']
 
-        for lfp in self.__lfp:
+        for lfp in self.__lfp.values():
             lfp.align(ts_beh)
 
-        for clu in self.__units:
-            clu.align(ts_beh)
+        for clu in self.__units.values():
             if self.__lfp is not None:
-                clu.align_lfp(self.__lfp.data['ts'])
+                k = list(self.__lfp.keys())[0]
+                clu.align(self.__raw, self.__lfp[k]._Lfp__raw)
+            else:
+                clu.align(self.__raw)
+
 
     @property
     def epoch(self):
@@ -74,9 +77,11 @@ class Session:
         if type(value) == beepy.Lfp.Lfp:
             self.__lfp = value
             self.__lfp.epoch = self.epoch
+            self.__lfp.align(self.__raw['ts'])
         elif type(value) == dict:
             for channel in value.values():
                 channel.epoch = self.epoch
+                channel.align(self.__raw['ts'])
             self.__lfp = value
         else:
             print("Input must be singleton or dict of beepy.LFP.lfp objects")
@@ -115,34 +120,37 @@ class Session:
         if lfp is None:
             lfp = self.active_lfp
 
-        self.__epoched = {}
-        inds = (self.__raw['ts'] > epoch[0]) & (self.__raw['ts'] < epoch[1])
-        self.__epoched_beh = {}
-        for k in self.__raw.keys():
-            self.__epoched_beh[k] = self.__raw[k][inds]
+        if type(epoch[0]) != list:
+            epoch = [epoch]
+
+        self.__data = {}
+        for k in self.__raw:
+            self.__data[k] = [[]] * epoch.__len__()
+
+        for e in np.arange(epoch.__len__()):
+            inds = (self.__raw['ts'] > epoch[e][0]) & (self.__raw['ts'] < epoch[e][1])
+            for k in self.__raw:
+                self.__data[k][e] = self.__raw[k][inds]
 
         if lfp is not None:
             self.__lfp[lfp].epoch = epoch
 
         if unit is not None:
+            self.__units[unit].align(self.__raw, self.__lfp[self.active_lfp]._Lfp__raw)
             self.__units[unit].epoch = epoch
 
         self.__epoch = epoch
         self.__active_lfp = lfp
         self.__active_unit = unit
 
-        format = namedtuple('data', list(self.__raw.keys()), defaults=[None] * self.__raw.keys().__len__())
-        self.__data = format._make(self.__raw.values())
-
     def __repr__(self):
         s = "BeEpy.Session with: \n"
         s += "  N raw = %d \n" % (self.__raw['ts'].__len__())
-        #s += "\n"
-        #s += "  N epoched = %d" % (self.__data['ts'].__len__())
+        # s += "\n"
+        # s += "  N epoched = %d" % (self.__data['ts'].__len__())
         s += "And fields: \n"
         for k in self.__raw.keys():
             s += k
             s += '; '
 
         return s
-

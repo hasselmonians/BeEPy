@@ -9,21 +9,39 @@ class Unit:
         self.__epoched = None
         self.epoch = [-np.inf, np.inf]
 
-    def align(self):
-        pass
+    def align(self, beh, lfp=None):
+        self.__raw['ind_beh'] = np.digitize(self.__raw['ts'], beh['ts'])
+        self.__raw['ind_lfp'] = np.digitize(self.__raw['ts'], lfp['ts'])
+
+        for k in beh.keys():
+            if k not in ['ts', 'ind']:
+                self.__raw[k] = beh[k][self.__raw['ind_beh']]
+
+        for k in lfp.keys():
+            if k not in ['ts', 'ind', 'ind_beh']:
+                self.__raw[k] = lfp[k][self.__raw['ind_lfp']]
+
+        self.epoch = self.epoch
 
     @property
     def epoch(self):
         return None
 
     @epoch.setter
-    def epoch(self, epoch=(-np.inf, np.inf)):
-        inds = (self.__raw['ts'] > epoch[0]) & (self.__raw['ts'] < epoch[1])
-        data = namedtuple('data', list(self.__raw.keys()), defaults=[None] * self.__raw.keys().__len__())
-        self.__data = data._make(self.__raw.values())
+    def epoch(self, epoch=None):
+        if epoch is None:
+            epoch = [[-np.inf, np.inf]]
+        if type(epoch[0]) != list:
+            epoch = [epoch]
 
-        for k in self.__data:
-            k = k[inds]
+        self.__data = {}
+        for k in self.__raw:
+            self.__data[k] = [[]] * epoch.__len__()
+
+        for e in np.arange(epoch.__len__()):
+            inds = (self.__raw['ts'] > epoch[e][0]) & (self.__raw['ts'] < epoch[e][1])
+            for k in self.__raw:
+                self.__data[k][e] = self.__raw[k][inds]
 
     @property
     def data(self):

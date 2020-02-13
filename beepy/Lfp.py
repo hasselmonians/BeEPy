@@ -23,13 +23,20 @@ class Lfp:
         return self.__epoch
 
     @epoch.setter
-    def epoch(self, epoch=(-np.inf, np.inf)):
-        inds = (self.__raw['ts'] > epoch[0]) & (self.__raw['ts'] < epoch[1])
-        data = namedtuple('data', list(self.__raw.keys()), defaults=[None] * self.__raw.keys().__len__())
-        self.__data = data._make(self.__raw.values())
+    def epoch(self, epoch=None):
+        if epoch is None:
+            epoch = [(-np.inf, np.inf)]
+        if type(epoch[0]) != list:
+            epoch = [epoch]
 
-        for k in self.__data:
-            k = k[inds]
+        self.__data = {}
+        for k in self.__raw:
+            self.__data[k] = self.__data[k] = [[]] * epoch.__len__()
+
+        for e in np.arange(epoch.__len__()):
+            inds = (self.__raw['ts'] > epoch[e][0]) & (self.__raw['ts'] < epoch[e][1])
+            for k in self.__raw:
+                self.__data[k][e] = self.__raw[k][inds]
 
     @property
     def data(self):

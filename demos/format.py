@@ -39,12 +39,9 @@ fs = 1/(ts[2] - ts[1])
 root = beepy.Session.Session(fs, ts, x, y, lfp=lfp, units=units)
 root.active_lfp = 13
 root.active_unit = (0, 0)
-#root.align()
-
-# %%
+root.align()
 root.lfp.add_band(name='theta')
-
-root.lfp
+root.unit
 
 # %%
 # root.align()
